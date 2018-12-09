@@ -17,14 +17,21 @@ def danmuku_xml_to_dict(xml_path):
     dbid: 数据库记录ID（单调递增）
     """
     res_list = []
+    type_dict = {}
     for idx in range(len(a['i']['d'])):
         itm = a['i']['d'][idx]
         pos_full = itm['@p'].split(',')
         txt = itm['#text']
+        f_color = hex(int(pos_full[3]))[2:]
+        if len(f_color) != 6:
+            f_color = '00' + f_color
+        f_color = "#" + f_color
         if pos_full[1] < '7':
+            type_dict[pos_full[1]] = True
             res_list.append({"stime": float(pos_full[0]), 'font_size': int(pos_full[2]),
-                             'font_color': hex(int(pos_full[3])), "text": txt})
+                             'font_color': f_color, "text": txt})
         else:
             print(pos_full, txt)
     res_list = sorted(res_list, key=lambda k: k['stime'])
+    print(type_dict)
     return res_list
