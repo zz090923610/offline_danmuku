@@ -1,5 +1,7 @@
 import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtGui import QColor
+from PyQt5.QtWidgets import QGraphicsDropShadowEffect
 
 from get_danmuku import danmuku_xml_to_dict
 
@@ -26,6 +28,7 @@ class DanmukuLabel(QtWidgets.QLabel):
     def __init__(self, desc_dict, *__args):
         super().__init__(*__args)
         # {'stime': 1.418, 'font_size': 25, 'font_color': '0xa0ee00', 'text': '来窒息了'}
+
         f = self.font()
         # f.setBold(True)
         self.show_time = desc_dict['stime']
@@ -36,9 +39,16 @@ class DanmukuLabel(QtWidgets.QLabel):
         f.setPointSize(font_size)
         self.setFont(f)
         self.setWordWrap(True)
-        self.setStyleSheet("border-color: rgb(255, 0, 0);border-width: 1px;font-family:Microsoft YaHei;")
         self.danmuku_width = self.fontMetrics().boundingRect(self.text()).width()
         self.danmuku_height = self.fontMetrics().boundingRect(self.text()).height()
+        effect = QGraphicsDropShadowEffect(self)
+
+        effect.setBlurRadius(20)
+        effect.setColor(QColor("#000000"))
+        effect.setOffset(0, 0)
+        self.setGraphicsEffect(effect)
+
+
         self.animation = QtCore.QPropertyAnimation(self, "geometry".encode())
 
     def setup_animation(self, desc_dict):
@@ -146,6 +156,6 @@ if __name__ == '__main__':
     pos.setY(pos.y() - quit_button.frameSize().height())
     quit_button.move(pos)
     # Run the application
-    # window.showFullScreen()
-    window.showMaximized()
+    window.showFullScreen()
+    #window.showMaximized()
     sys.exit(app.exec_())
