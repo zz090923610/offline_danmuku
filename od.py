@@ -84,10 +84,7 @@ class DanmukuManager:
         self.speed = 0.23272727272727273
         self.duration = display_geo['width'] / self.speed
 
-    def seek(self, to):
-        self.current_time = to
-        self.current_idx = find_ge_idx(self.danmuku_list, self.current_time)
-        self.start_time = time.time() - to
+
 
     def register_danmuku_route(self, danmuku_qlabel, route_idx):
         occupy_until = self.current_time + danmuku_qlabel.danmuku_width * self.duration / (
@@ -104,23 +101,26 @@ class DanmukuManager:
     def update_danmuku(self):
         self.current_time = (time.time() - self.start_time) * 1000
         if self.current_idx >= len(self.danmuku_list):
-            return
-        while self.current_time / 1000 > self.danmuku_list[self.current_idx]['stime']:
-            print('add', self.current_time / 1000, self.danmuku_list[self.current_idx]['stime'],
-                  self.danmuku_list[self.current_idx]['text'])
-            danmuku_label = DanmukuLabel(self.danmuku_list[self.current_idx], self.gui_parent)
-            danmuku_label.show()
+            if len(self.danmuku_obj_list) == 0:
+                self.stop()
+        else:
+            while self.current_time / 1000 > self.danmuku_list[self.current_idx]['stime']:
+                print('add', self.current_time / 1000, self.danmuku_list[self.current_idx]['stime'],
+                      self.danmuku_list[self.current_idx]['text'])
+                danmuku_label = DanmukuLabel(self.danmuku_list[self.current_idx], self.gui_parent)
+                danmuku_label.show()
 
-            route_idx = self.get_danmuku_route()
-            route_h_idx = self.register_danmuku_route(danmuku_label, route_idx)
+                route_idx = self.get_danmuku_route()
+                route_h_idx = self.register_danmuku_route(danmuku_label, route_idx)
 
-            danmuku_label.setup_animation(
-                {'duration': self.duration, '0': {'w_idx': self.display_geo['width'], 'h_idx': route_h_idx},
-                 '1': {'w_idx': 0 - danmuku_label.danmuku_width, 'h_idx': route_h_idx}})
-            danmuku_label.start_animation()
-            self.danmuku_obj_list.append(danmuku_label)
-            self.current_idx += 1
-
+                danmuku_label.setup_animation(
+                    {'duration': self.duration, '0': {'w_idx': self.display_geo['width'], 'h_idx': route_h_idx},
+                     '1': {'w_idx': 0 - danmuku_label.danmuku_width, 'h_idx': route_h_idx}})
+                danmuku_label.start_animation()
+                self.danmuku_obj_list.append(danmuku_label)
+                self.current_idx += 1
+                if self.current_idx >= len(self.danmuku_list):
+                    break
         while len(self.danmuku_obj_list):
             try:
                 item_show_time = self.danmuku_obj_list[0].show_time
@@ -133,12 +133,22 @@ class DanmukuManager:
             except:
                 break
 
+    def seek(self, to):
+        self.current_time = to
+        self.current_idx = find_ge_idx(self.danmuku_list, self.current_time)
+        self.start_time = time.time() - to
+
     def play(self):
         self.timer.start()
 
     def pause(self):
         self.timer.stop()
 
+    def stop(self):
+        print("STOP")
+        self.timer.stop()
+        self.current_time = 0
+        self.current_idx = 0
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
